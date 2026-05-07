@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Sistem Informasi OJK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  
+  <style>
+    :root {
+      --bg: #eae7df;
+      --card: #f0ede6;
+      --ink: #111111;
+      --ink-soft: #555;
+      --muted: #9a978f;
+      --line: #d4d0c7;
+      --red: #cf0000;
+      --radius: 24px;
+      --notch: 40px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--bg); }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 18px;
+    }
+
+    /* ============================================================
+       NOTCH SHAPE — single concave cut at bottom-right only
+       Reference: Apollo card (rounded rect + BR inward arc)
+    ============================================================ */
+    .notch {
+      position: relative;
+      background: var(--card);
+      border-radius: var(--radius);
+      /* Cut a concave circle out of the bottom-right corner only */
+      -webkit-mask:
+        radial-gradient(circle var(--notch) at 100% 100%, transparent 98%, #000 100%)
+          bottom right / 100% 100% no-repeat;
+      mask:
+        radial-gradient(circle var(--notch) at 100% 100%, transparent 98%, #000 100%)
+          bottom right / 100% 100% no-repeat;
+    }
+
+    /* ============================================================
+       TOP BAR
+    ============================================================ */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 14px 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 0 4px rgba(214,56,50,0.14);
+    }
+    .topbar-right { display: flex; gap: 26px; }
+    .topbar-right b { color: var(--ink); font-weight: 500; }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    .hero {
+      margin-bottom: 14px;
+    }
+    .hero-main {
+      padding: 40px 48px 38px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .hero-pill {
+      background: var(--red);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(62px, 8vw, 120px);
+      line-height: 0.88;
+      letter-spacing: -0.01em;
+    }
+    .hero-title .outline {
+      -webkit-text-stroke: 1.5px var(--ink);
+      color: transparent;
+    }
+    .hero-title .red { color: var(--red); }
+    .hero-sub {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--ink-soft);
+      max-width: 520px;
+    }
+    .hero-stat-row {
+      display: flex;
+      gap: 0;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+    .hero-stat { flex: 0 0 auto; padding-right: 36px; }
+    .hero-stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      line-height: 1;
+      color: var(--red);
+    }
+    .hero-stat-lab {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    /* ============================================================
+       CONTROLS
+    ============================================================ */
+    .controls {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 14px;
+      align-items: stretch;
+    }
+
+    /* Filter bar — pill container, NO notch shape */
+    .filter-wrap {
+      flex: 1;
+      background: var(--card);
+      border-radius: 100px;          /* full pill / capsule */
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow: hidden;
+    }
+    .filter-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 12px 0 10px;
+      white-space: nowrap;
+    }
+    .filter-inner {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-inner::-webkit-scrollbar { display: none; }
+    .filter-btn {
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12.5px;
+      letter-spacing: 0.02em;
+      color: var(--ink-soft);
+      padding: 10px 18px;
+      border-radius: 100px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.14s, color 0.14s;
+    }
+    .filter-btn:hover { background: rgba(0,0,0,0.05); color: var(--ink); }
+    .filter-btn.active { background: var(--ink); color: #fff; }
+
+    /* Search */
+    .search-wrap {
+      background: var(--card);
+      border-radius: 100px;
+      padding: 10px 12px 10px 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 300px;
+      flex-shrink: 0;
+    }
+    .search-wrap input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      flex: 1;
+      min-width: 0;
+    }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-go {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--red);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       DIRECTORY HEADER
+    ============================================================ */
+    .dir-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 14px 6px 12px;
+    }
+    .dir-head h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px;
+      letter-spacing: 0.01em;
+    }
+    .dir-head .meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .dir-head .meta b { color: var(--ink); font-weight: 500; }
+
+    /* ============================================================
+       APP GRID
+    ============================================================ */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .app-card {
+      padding: 26px 26px 24px;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      transition: transform 0.18s, filter 0.18s;
+    }
+    .app-card:hover { transform: translateY(-3px); filter: brightness(0.96); }
+    .app-card:hover .card-arrow { background: var(--red); color: #fff; transform: translate(2px,-2px); }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .card-index {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+    .card-arrow {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.07);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink);
+      transition: background 0.18s, color 0.18s, transform 0.18s;
+      flex-shrink: 0;
+    }
+    .card-cat {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--red);
+    }
+    .card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 40px;
+      line-height: 0.93;
+      letter-spacing: 0.01em;
+      margin-top: 2px;
+    }
+    .card-fullname {
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--ink-soft);
+    }
+    .card-spacer { flex: 1; }
+
+    /* VPN badge — highlighted */
+    .vpn-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #fff;
+      background: #111;
+      padding: 5px 12px 5px 9px;
+      border-radius: 100px;
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+    .vpn-badge .vpn-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--red);
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       EMPTY STATE
+    ============================================================ */
+    .empty-state {
+      grid-column: span 4;
+      padding: 80px 20px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .footer {
+      margin-top: 24px;
+      padding: 20px 6px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .footer-left { display: flex; align-items: center; gap: 12px; }
+    .footer-badge {
+      background: var(--ink);
+      color: #fff;
+      padding: 4px 11px;
+      border-radius: 100px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 1100px) {
+      .app-grid { grid-template-columns: repeat(2, 1fr); }
+      .empty-state { grid-column: span 2; }
+    }
+    @media (max-width: 640px) {
+      .app-grid { grid-template-columns: 1fr; }
+      .empty-state { grid-column: span 1; }
+      .controls { flex-direction: column; }
+      .search-wrap { width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-dot"></span>
+      <span>OJK / Portal Sistem Informasi</span>
+    </div>
+    <div class="topbar-right">
+      <span>v0.1 © 2026</span>
+      <span>Internal Use Only</span>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-main notch">
+      <div class="hero-eyebrow">
+        <span class="hero-pill">OJK</span>
+        <span>Otoritas Jasa Keuangan / Internal</span>
+      </div>
+      <div class="hero-title">
+        KATALOG<br>
+        SISTEM <span class="outline">INFORMASI</span><br>
+        <span class="red">OJK</span>
+      </div>
+      <div class="hero-sub">
+        Satu portal untuk shortcut ke Sistem Informasi OJK.
+      </div>
+      <div class="hero-stat-row">
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="total-count">16</div>
+          <div class="hero-stat-lab">Aplikasi</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="filter-wrap">
+      <span class="filter-label">Filter ›</span>
+      <div class="filter-inner">
+        <button class="filter-btn active" onclick="setFilter('semua',this)">Semua</button>
+        <button class="filter-btn" onclick="setFilter('pengawasan',this)">Pengawasan</button>
+        <button class="filter-btn" onclick="setFilter('pelaporan',this)">Pelaporan</button>
+        <button class="filter-btn" onclick="setFilter('perizinan',this)">Perizinan</button>
+        <button class="filter-btn" onclick="setFilter('sdm',this)">SDM &amp; Umum</button>
+        <button class="filter-btn" onclick="setFilter('data',this)">Data &amp; Riset</button>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9a978f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="search-input" placeholder="Cari aplikasi..." oninput="filterApps()">
+      <div class="search-go">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRECTORY -->
+  <div class="dir-head" id="direktori">
+    <h2>DIREKTORI APLIKASI</h2>
+    <div class="meta">Menampilkan <b id="visible-count">16</b> dari <b>16</b> sistem</div>
+  </div>
+
+  <div class="app-grid" id="app-grid"></div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      <span class="footer-badge">OJK</span>
+      <span>Otoritas Jasa Keuangan — Portal Internal</span>
+    </div>
+    <div>2026 / HANYA UNTUK PENGGUNAAN INTERNAL</div>
+  </div>
+
+  <script>
+    const apps = [
+      { id:'01', title:'SIPENA',      fullname:'Sistem Pengelolaan Naskah Dinas dan Arsip',        cat:'SDM & Umum',   catKey:'sdm',          url:'https://sipena.ojk.go.id/',       vpn:false },
+      { id:'02', title:'SIPIKNB',     fullname:'Sistem Informasi Pengawasan IKNB OJK',             cat:'Pengawasan',   catKey:'pengawasan',    url:'https://siiknb.ojk.go.id/',       vpn:true  },
+      { id:'03', title:'SIIKNB',      fullname:'Analisa Laporan Berkala IKNB',                     cat:'Pengawasan',   catKey:'pengawasan',    url:'https://siiknb-alb.ojk.go.id/',   vpn:true  },
+      { id:'04', title:'SIGAP',       fullname:'Sistem Informasi Program APU PPT',                 cat:'Pengawasan',   catKey:'pengawasan',    url:'https://sigap.ojk.go.id/',        vpn:false },
+      { id:'05', title:'PRIME',       fullname:'Portal Informasi dan Monitoring Efek IKNB',        cat:'Pengawasan',   catKey:'pengawasan',    url:'https://idaman.ojk.go.id/',       vpn:true  },
+      { id:'06', title:'SIPO',        fullname:'Sistem Informasi Penerimaan OJK',                  cat:'Pengawasan',   catKey:'pengawasan',    url:'https://sipo.ojk.go.id/',         vpn:false },
+      { id:'07', title:'E-REPORTING', fullname:'Pelaporan Elektronik OJK',                         cat:'Pelaporan',    catKey:'pelaporan',     url:'https://ereporting.ojk.go.id/',   vpn:false },
+      { id:'08', title:'APOLO',       fullname:'Aplikasi Pelaporan Online OJK',                    cat:'Pelaporan',    catKey:'pelaporan',     url:'https://apolo.ojk.go.id/',        vpn:false },
+      { id:'09', title:'SIPEDULI',    fullname:'Pelaporan Edukasi & Perlindungan Konsumen',        cat:'Pelaporan',    catKey:'pelaporan',     url:'https://peduli.ojk.go.id/',       vpn:false },
+      { id:'10', title:'SIPUTRI',     fullname:'Sistem Informasi Terintegrasi',                    cat:'Data & Riset', catKey:'data',          url:'https://siputri.ojk.go.id/',      vpn:true  },
+      { id:'11', title:'SLIK',        fullname:'Sistem Layanan Informasi Keuangan',                cat:'Data & Riset', catKey:'data',          url:'https://slik.ojk.go.id/slik',     vpn:false },
+      { id:'12', title:'SPRINT',      fullname:'Perizinan dan Registrasi Terintegrasi',            cat:'Perizinan',    catKey:'perizinan',     url:'https://sprint.ojk.go.id/',       vpn:false },
+      { id:'13', title:'OJK SAR',     fullname:'',                                                 cat:'SDM & Umum',   catKey:'sdm',          url:'https://ojksar.ojk.go.id/',       vpn:true  },
+      { id:'14', title:'SIMFOSIA',    fullname:'Sistem Informasi Sumber Daya Manusia',             cat:'SDM & Umum',   catKey:'sdm',          url:'https://ojksar.ojk.go.id/',       vpn:true  },
+      { id:'15', title:'EMAIL OJK',   fullname:'Layanan Surat Elektronik OJK',                    cat:'SDM & Umum',   catKey:'sdm',          url:'https://mail.ojk.go.id/',         vpn:false },
+      { id:'16', title:'LMS OJK',    fullname:'Learning Management System Edukasi Keuangan OJK', cat:'SDM & Umum',   catKey:'sdm',          url:'https://lms.ojk.go.id/',          vpn:false },
+      { id:'16', title:'JDIH OJK',    fullname:'Jaringan Dokumen dan Informasi Hukum OJK',         cat:'Data & Riset', catKey:'data',          url:'https://jdih.ojk.go.id/',         vpn:false },
+    ];
+
+    let activeFilter = 'semua';
+    let searchQuery   = '';
+
+    function renderGrid() {
+      const grid = document.getElementById('app-grid');
+      grid.innerHTML = '';
+
+      const filtered = apps.filter(a => {
+        const catOk = activeFilter === 'semua' || a.catKey === activeFilter;
+        const sOk   = !searchQuery ||
+          a.title.toLowerCase().includes(searchQuery) ||
+          (a.fullname||'').toLowerCase().includes(searchQuery) ||
+          a.cat.toLowerCase().includes(searchQuery);
+        return catOk && sOk;
+      });
+
+      document.getElementById('visible-count').textContent = filtered.length;
+      document.getElementById('total-count').textContent   = apps.length;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="empty-state notch">— Tidak ada aplikasi ditemukan —</div>';
+        return;
+      }
+
+      filtered.forEach(app => {
+        const card = document.createElement('a');
+        card.className = 'app-card notch';
+        card.href      = app.url;
+        card.target    = '_blank';
+        card.rel       = 'noopener noreferrer';
+
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="card-index">(${app.id})</div>
+            <div class="card-arrow">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card-cat">${app.cat}</div>
+          <div class="card-title">${app.title}</div>
+          ${app.fullname ? `<div class="card-fullname">${app.fullname}</div>` : ''}
+          <div class="card-spacer"></div>
+          ${app.vpn ? `
+          <div class="vpn-badge">
+            <span class="vpn-dot"></span>
+            Memerlukan VPN OJK
+          </div>` : ''}
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function setFilter(f, el) {
+      activeFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      renderGrid();
+    }
+
+    function filterApps() {
+      searchQuery = document.getElementById('search-input').value.toLowerCase();
+      renderGrid();
+    }
+
+    renderGrid();
+  </script>
+
+
+
+<style id="__om-edit-overrides">
+#app-grid >a:nth-child(16) { border-width: 2px !important; border-style: solid !important }
+#app-grid >a:nth-child(16) { border-width: 1px !important }
+#app-grid >a:nth-child(16) { border-width: 0px !important }
+</style>
+</body></html>
